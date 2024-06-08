@@ -45,7 +45,7 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
     for i in tqdm(range(0, len(dir_list), batchSize)):
         img_array = []
         start, end = i, i+batchSize
-        print("processing ", start, end)
+        # print("processing ", start, end)
         for filename in  tqdm(dir_list[start:end]):
             filename = restored_frames_path+filename
             img = cv2.imread(filename)

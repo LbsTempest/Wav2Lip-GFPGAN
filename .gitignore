@@ -6,3 +6,5 @@
 /**/.vscode
 /**/.github
 /**/__pycache__
+/output
+/temp

@@ -14,6 +14,9 @@ def main(images_path, output_path):
     """Inference demo for GFPGAN (for users).
     """
     parser = argparse.ArgumentParser()
+    parser.add_argument("--input_audio")
+    parser.add_argument("--input_video")
+    parser.add_argument("--ckpt")
     parser.add_argument(
         '-i',
         '--input',
@@ -96,7 +99,7 @@ def main(images_path, output_path):
         raise ValueError(f'Wrong model version {args.version}.')
 
     # determine model paths
-    model_path = os.path.join('experiments/pretrained_models', model_name + '.pth')
+    model_path = os.path.join('GFPGAN_master/experiments/pretrained_models', model_name + '.pth')
     if not os.path.isfile(model_path):
         model_path = os.path.join('realesrgan/weights', model_name + '.pth')
     if not os.path.isfile(model_path):
@@ -113,7 +116,7 @@ def main(images_path, output_path):
     for img_path in tqdm(img_list):
         # read image
         img_name = os.path.basename(img_path)
-        print(f'Processing {img_name} ...')
+        # print(f'Processing {img_name} ...')
         basename, ext = os.path.splitext(img_name)
         input_img = cv2.imread(img_path, cv2.IMREAD_COLOR)
 
