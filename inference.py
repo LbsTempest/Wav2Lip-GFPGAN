@@ -12,12 +12,11 @@ from Wav2Lip_master.inference_w2l import main as w2l_main
 def main(input_audio, input_video, checkpoint_path, output_path="output") -> None:
     w2l_path = "Wav2Lip_master"
     g_path = "GFPGAN_master"
-    lip_synced_output_path = "outputs/result.mp4"
-
+    lip_synced_output_path = os.path.join(output_path, "result.mp4")
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    w2l_main(input_audio, input_video, checkpoint_path)
+    w2l_main(input_audio, input_video, checkpoint_path, lip_synced_output_path)
     # subprocess.call()
 
     unprocessed_frames_folder_path = os.path.join(output_path, "frames")
@@ -32,7 +31,7 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
 
     for frame_number in tqdm(range(number_of_frames)):
         _,image = vidcap.read()
-        cv2.imwrite(path.join(unProcessedFramesFolderPath, str(frame_number).zfill(4)+'.jpg'), image)
+        cv2.imwrite(path.join(unprocessed_frames_folder_path, str(frame_number).zfill(4)+'.jpg'), image)
 
     g_main(unprocessed_frames_folder_path, output_path)
 

@@ -175,7 +175,7 @@ def load_model(path):
 	model = model.to(device)
 	return model.eval()
 
-def main(input_audio, input_video, checkpoint_path):
+def main(input_audio, input_video, checkpoint_path, output_path):
 	if os.path.isfile(input_video) and input_video.split('.')[1] in ['jpg', 'png', 'jpeg']:
 		args.static = True
 	if not os.path.isfile(input_video):
@@ -272,7 +272,7 @@ def main(input_audio, input_video, checkpoint_path):
 
 	out.release()
 
-	command = 'ffmpeg -y -i {} -i {} -strict -2 -q:v 1 {}'.format(input_audio, 'temp/result.avi', args.outfile)
+	command = 'ffmpeg -y -i {} -i {} -strict -2 -q:v 1 {}'.format(input_audio, 'temp/result.avi', output_path)
 	subprocess.call(command, shell=platform.system() != 'Windows')
 
 if __name__ == '__main__':
