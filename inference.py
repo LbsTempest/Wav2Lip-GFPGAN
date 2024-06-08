@@ -24,18 +24,18 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
     if not os.path.exists(unprocessed_frames_folder_path):
         os.makedirs(unprocessed_frames_folder_path)
 
-    vidcap = cv2.VideoCapture(inputVideoPath)
+    vidcap = cv2.VideoCapture(input_video)
     number_of_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
     fps = vidcap.get(cv2.CAP_PROP_FPS)
     print("FPS: ", fps, "Frames: ", number_of_frames)
 
     for frame_number in tqdm(range(number_of_frames)):
         _,image = vidcap.read()
-        cv2.imwrite(path.join(unprocessed_frames_folder_path, str(frame_number).zfill(4)+'.jpg'), image)
+        cv2.imwrite(os.path.join(unprocessed_frames_folder_path, str(frame_number).zfill(4)+'.jpg'), image)
 
     g_main(unprocessed_frames_folder_path, output_path)
 
-    restored_frames_path = outputPath + '/restored_imgs/'
+    restored_frames_path = output_path + '/restored_imgs/'
 
     dir_list = os.listdir(restored_frames_path)
     dir_list.sort()
@@ -43,29 +43,29 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
     batch = 0
     batchSize = 300
     for i in tqdm(range(0, len(dir_list), batchSize)):
-      img_array = []
-      start, end = i, i+batchSize
-      print("processing ", start, end)
-      for filename in  tqdm(dir_list[start:end]):
-          filename = restored_frames_path+filename
-          img = cv2.imread(filename)
-          if img is None:
-            continue
-          height, width, layers = img.shape
-          size = (width,height)
-          img_array.append(img)
+        img_array = []
+        start, end = i, i+batchSize
+        print("processing ", start, end)
+        for filename in  tqdm(dir_list[start:end]):
+            filename = restored_frames_path+filename
+            img = cv2.imread(filename)
+            if img is None:
+              continue
+            height, width, layers = img.shape
+            size = (width,height)
+            img_array.append(img)
 
     out = cv2.VideoWriter(output_path+'/batch_'+str(batch).zfill(4)+'.avi',cv2.VideoWriter_fourcc(*'DIVX'), 30, size)
     batch = batch + 1
 
     for i in range(len(img_array)):
-      out.write(img_array[i])
+        out.write(img_array[i])
     out.release()
 
     concat_text_file_path = output_path + "/concat.txt"
     concat_text_file=open(concat_text_file_path,"w")
     for ips in range(batch):
-      concat_text_file.write("file batch_" + str(ips).zfill(4) + ".avi\n")
+        concat_text_file.write("file batch_" + str(ips).zfill(4) + ".avi\n")
     concat_text_file.close()
 
     concatedVideoOutputPath = outputPath + "/concated_output.avi"
