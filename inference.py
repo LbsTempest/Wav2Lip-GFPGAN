@@ -50,7 +50,7 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
             filename = restored_frames_path+filename
             img = cv2.imread(filename)
             if img is None:
-              continue
+                continue
             height, width, layers = img.shape
             size = (width,height)
             img_array.append(img)
@@ -68,16 +68,31 @@ def main(input_audio, input_video, checkpoint_path, output_path="output") -> Non
         concat_text_file.write("file batch_" + str(ips).zfill(4) + ".avi\n")
     concat_text_file.close()
 
-    concatedVideoOutputPath = outputPath + "/concated_output.avi"
+    concated_video_output_path = output_path + "/concated_output.avi"
     subprocess.run([
         'ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', concat_text_file_path, 
         '-c', 'copy', concated_video_output_path
     ], check=True)
-    finalProcessedOuputVideo = processedVideoOutputPath+'/final_with_audio.avi'
-    subprocess.run([
-        'ffmpeg', '-y', '-i', concated_video_path, '-i', input_audio, 
-        '-map', '0', '-map', '1:a', '-c:v', 'copy', '-shortest', final_processed_output_video
-    ], check=True)
+    final_processed_output_video = output_path + "/final_with_audio.avi"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            concated_video_output_path,
+            "-i",
+            input_audio,
+            "-map",
+            "0",
+            "-map",
+            "1:a",
+            "-c:v",
+            "copy",
+            "-shortest",
+            final_processed_output_video,
+        ],
+        check=True,
+    )
 
 
 if __name__ == '__main__':

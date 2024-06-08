@@ -7,7 +7,7 @@ import torch
 from basicsr.utils import imwrite
 from tqdm import tqdm
 
-from gfpgan import GFPGANer
+from GFPGAN_master.gfpgan import GFPGANer
 
 
 def main(images_path, output_path):

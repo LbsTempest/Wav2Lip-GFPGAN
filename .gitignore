@@ -5,3 +5,4 @@
 /**/*.pth
 /**/.vscode
 /**/.github
+/**/__pycache__
