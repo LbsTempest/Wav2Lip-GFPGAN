@@ -1,0 +1,7 @@
+/main
+/lrs2_preprocessed
+/w2l_ckpt
+/expert_d_ckpt
+/**/*.pth
+/**/.vscode
+/**/.github

@@ -10,7 +10,7 @@ from tqdm import tqdm
 from gfpgan import GFPGANer
 
 
-def main():
+def main(images_path, output_path):
     """Inference demo for GFPGAN (for users).
     """
     parser = argparse.ArgumentParser()
@@ -28,7 +28,7 @@ def main():
         '-s', '--upscale', type=int, default=2, help='The final upsampling scale of the image. Default: 2')
 
     parser.add_argument(
-        '--bg_upsampler', type=str, default='realesrgan', help='background upsampler. Default: realesrgan')
+        '--bg_upsampler', type=str, default=None, help='background upsampler. Default: realesrgan')
     parser.add_argument(
         '--bg_tile',
         type=int,
@@ -48,14 +48,14 @@ def main():
     args = parser.parse_args()
 
     # ------------------------ input & output ------------------------
-    if args.input.endswith('/'):
-        args.input = args.input[:-1]
-    if os.path.isfile(args.input):
-        img_list = [args.input]
+    if images_path.endswith('/'):
+        images_path = images_path[:-1]
+    if os.path.isfile(images_path):
+        img_list = [images_path]
     else:
-        img_list = sorted(glob.glob(os.path.join(args.input, '*')))
+        img_list = sorted(glob.glob(os.path.join(images_path, '*')))
 
-    os.makedirs(args.output, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
 
     # ------------------------ set up background upsampler ------------------------
     if args.bg_upsampler == 'realesrgan':
@@ -125,18 +125,18 @@ def main():
         if(args.save_faces):
           for idx, (cropped_face, restored_face) in enumerate(zip(cropped_faces, restored_faces)):
               # save cropped face
-              save_crop_path = os.path.join(args.output, 'cropped_faces', f'{basename}_{idx:02d}.png')
+              save_crop_path = os.path.join(output_path, 'cropped_faces', f'{basename}_{idx:02d}.png')
               imwrite(cropped_face, save_crop_path)
               # save restored face
               if args.suffix is not None:
                   save_face_name = f'{basename}_{idx:02d}_{args.suffix}.png'
               else:
                   save_face_name = f'{basename}_{idx:02d}.png'
-              save_restore_path = os.path.join(args.output, 'restored_faces', save_face_name)
+              save_restore_path = os.path.join(output_path, 'restored_faces', save_face_name)
               imwrite(restored_face, save_restore_path)
               # save comparison image
               cmp_img = np.concatenate((cropped_face, restored_face), axis=1)
-              imwrite(cmp_img, os.path.join(args.output, 'cmp', f'{basename}_{idx:02d}.png'))
+              imwrite(cmp_img, os.path.join(output_path, 'cmp', f'{basename}_{idx:02d}.png'))
 
         # save restored img
         if restored_img is not None:
@@ -146,12 +146,12 @@ def main():
                 extension = args.ext
 
             if args.suffix is not None:
-                save_restore_path = os.path.join(args.output, 'restored_imgs', f'{basename}_{args.suffix}.{extension}')
+                save_restore_path = os.path.join(output_path, 'restored_imgs', f'{basename}_{args.suffix}.{extension}')
             else:
-                save_restore_path = os.path.join(args.output, 'restored_imgs', f'{basename}.{extension}')
+                save_restore_path = os.path.join(output_path, 'restored_imgs', f'{basename}.{extension}')
             imwrite(restored_img, save_restore_path)
 
-    print(f'Results are in the [{args.output}] folder.')
+    print(f'Results are in the [{output_path}] folder.')
 
 
 if __name__ == '__main__':

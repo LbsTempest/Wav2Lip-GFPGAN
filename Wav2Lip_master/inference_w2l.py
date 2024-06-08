@@ -1,22 +1,22 @@
 from os import listdir, path
 import numpy as np
-import scipy, cv2, os, sys, argparse, audio
+import scipy, cv2, os, sys, argparse, Wav2Lip_master.audio
 import json, subprocess, random, string
 from tqdm import tqdm
 from glob import glob
-import torch, face_detection
-from models import Wav2Lip
+import torch, Wav2Lip_master.face_detection
+from Wav2Lip_master.models import Wav2Lip
 import platform
 
 parser = argparse.ArgumentParser(description='Inference code to lip-sync videos in the wild using Wav2Lip models')
 
-parser.add_argument('--checkpoint_path', type=str, 
-					help='Name of saved checkpoint to load weights from', required=True)
+parser.add_argument('--ckpt', type=str, 
+					help='Name of saved checkpoint to load weights from')
 
-parser.add_argument('--face', type=str, 
-					help='Filepath of video/image that contains faces to use', required=True)
-parser.add_argument('--audio', type=str, 
-					help='Filepath of video/audio file to use as raw audio source', required=True)
+parser.add_argument('--input_video', type=str, 
+					help='Filepath of video/image that contains faces to use')
+parser.add_argument('--input_audio', type=str, 
+					help='Filepath of video/audio file to use as raw audio source')
 parser.add_argument('--outfile', type=str, help='Video path to save result. See default for an e.g.', 
 								default='results/result_voice.mp4')
 
@@ -52,9 +52,6 @@ parser.add_argument('--nosmooth', default=False, action='store_true',
 
 args = parser.parse_args()
 args.img_size = 96
-
-if os.path.isfile(args.face) and args.face.split('.')[1] in ['jpg', 'png', 'jpeg']:
-	args.static = True
 
 def get_smoothened_boxes(boxes, T):
 	for i in range(len(boxes)):
@@ -178,16 +175,18 @@ def load_model(path):
 	model = model.to(device)
 	return model.eval()
 
-def main():
-	if not os.path.isfile(args.face):
+def main(input_audio, input_video, checkpoint_path):
+	if os.path.isfile(input_video) and input_video.split('.')[1] in ['jpg', 'png', 'jpeg']:
+		args.static = True
+	if not os.path.isfile(input_video):
 		raise ValueError('--face argument must be a valid path to video/image file')
 
-	elif args.face.split('.')[1] in ['jpg', 'png', 'jpeg']:
-		full_frames = [cv2.imread(args.face)]
+	elif input_video.split('.')[1] in ['jpg', 'png', 'jpeg']:
+		full_frames = [cv2.imread(input_video)]
 		fps = args.fps
 
 	else:
-		video_stream = cv2.VideoCapture(args.face)
+		video_stream = cv2.VideoCapture(input_video)
 		fps = video_stream.get(cv2.CAP_PROP_FPS)
 
 		print('Reading video frames...')
@@ -214,14 +213,14 @@ def main():
 
 	print ("Number of frames available for inference: "+str(len(full_frames)))
 
-	if not args.audio.endswith('.wav'):
+	if not input_audio.endswith('.wav'):
 		print('Extracting raw audio...')
-		command = 'ffmpeg -y -i {} -strict -2 {}'.format(args.audio, 'temp/temp.wav')
+		command = 'ffmpeg -y -i {} -strict -2 {}'.format(input_audio, 'temp/temp.wav')
 
 		subprocess.call(command, shell=True)
-		args.audio = 'temp/temp.wav'
+		input_audio = 'temp/temp.wav'
 
-	wav = audio.load_wav(args.audio, 16000)
+	wav = audio.load_wav(input_audio, 16000)
 	mel = audio.melspectrogram(wav)
 	print(mel.shape)
 
@@ -273,7 +272,7 @@ def main():
 
 	out.release()
 
-	command = 'ffmpeg -y -i {} -i {} -strict -2 -q:v 1 {}'.format(args.audio, 'temp/result.avi', args.outfile)
+	command = 'ffmpeg -y -i {} -i {} -strict -2 -q:v 1 {}'.format(input_audio, 'temp/result.avi', args.outfile)
 	subprocess.call(command, shell=platform.system() != 'Windows')
 
 if __name__ == '__main__':
